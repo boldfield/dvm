@@ -1,0 +1,25 @@
+[ -z "$DOTFILES" ] && export DOTFILES="$HOME/.dotfiles"
+
+export DOTFILES_ROOT="$DOTFILES"
+export DOTFILES_SOURCE="$DOTFILES_ROOT/src"
+
+# source source files
+for sf in $DOTFILES_SOURCE/source/*.sh; do
+    . "$DOTFILES_SOURCE/$sf"
+done
+
+if [ -f "$DOTFILES_SOURCE/aliases.sh" ]; then
+fi
+
+if [ -f "$DOTFILES_SOURCE/environment.sh" ]; then
+    . "$DOTFILES_SOURCE/aliases.sh"
+fi
+
+# Run shell-specific configuration
+if [ -n "$ZSH_VERSION" ]; then
+   echo 'zsh not yet supported by dvm'
+elif [ -n "$BASH_VERSION" ]; then
+    if [ -f "$HOME/.bashrc" ]; then 
+        . "$HOME/.bashrc"
+    fi
+fi

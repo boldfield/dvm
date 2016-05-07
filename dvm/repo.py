@@ -4,6 +4,7 @@ Dotfiel repo management utilities.
 import os
 import git
 
+import dvm
 from dvm.util import repo_location
 
 
@@ -55,6 +56,12 @@ def _init_paths(path, repo):
     for d in ['rc', 'source']:
         mk_path = os.path.join(path, d)
         os.mkdir(mk_path)
+
+    profile_name = 'dot.profile.symlink'
+    profile_source = os.path.join(dvm.DIR, 'static', profile_name)
+    profile_dest = os.path.join(path, 'rc', profile_name)
+    dvm.add.add_file(repo, profile_source, profile_dest, '.profile')
+
     for f in ['alias.sh', 'environment.sh']:
         mk_path = os.path.join(path, 'source', f)
         with open(mk_path, 'w') as fs:

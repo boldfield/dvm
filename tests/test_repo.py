@@ -8,18 +8,26 @@ from tests import tmp_repo_path
 
 class TestRepo(unittest.TestCase):
 
+    @patch('dvm.add.shutil')
     @patch('dvm.repo.git.Repo')
-    def test_init_no_origin(self, MockRepo):
+    def test_init_no_origin(self, MockRepo, MockShutil):
         with patch('dvm.repo.open', create=True) as mock_open:
 	  mock_open.return_value = MagicMock(spec=file)
           from dvm import repo
           with tmp_repo_path() as target:
               with patch.object(os, 'mkdir') as mock_mkdir:
-                  repo.init(target)
-                  MockRepo.init.assert_called_once_with(target)
-                  mock_mkdir.assert_has_calls([call(os.path.join(target, 'rc')), call(os.path.join(target, 'source'))])
-                  mock_open.assert_any_call(os.path.join(target, 'source', 'alias.sh'), 'w')
-                  mock_open.assert_any_call(os.path.join(target, 'source', 'environment.sh'), 'w')
+                  with patch.object(os, 'symlink') as mock_symlink:
+                      repo.init(target)
+                      MockRepo.init.assert_called_once_with(target)
+                      mock_mkdir.assert_has_calls([call(os.path.join(target, 'rc')),
+                                                   call(os.path.join(target, 'source'))])
+
+                      sym_source = os.path.join(target, 'rc', 'dot.profile.symlink')
+                      sym_dest = os.path.expanduser('~/.profile')
+                      mock_symlink.assert_has_calls([call(sym_source), call(sym_dest)])
+
+                      mock_open.assert_any_call(os.path.join(target, 'source', 'alias.sh'), 'w')
+                      mock_open.assert_any_call(os.path.join(target, 'source', 'environment.sh'), 'w')
 
     @patch('dvm.repo.git.Repo')
     def test_init_with_origin(self, MockRepo):
